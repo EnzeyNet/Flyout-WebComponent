@@ -2,6 +2,7 @@ Flyout WebComponent
 ====
 
 Element Name: fly-out
+Bower: nz-flyout-web-component
 
 CSS based flyout.
 
