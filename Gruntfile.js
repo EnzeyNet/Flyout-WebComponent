@@ -12,6 +12,34 @@ module.exports = function (grunt) {
 		pkg: grunt.file.readJSON('package.json'),
 		distdir: distdir,
 		projectName: projectName,
+
+      browserify: {
+         dist: {
+            options: {
+               transform: [
+                  ["babelify", {
+                  }]
+               ]
+            },
+            files: {
+               // if the source file has an extension of es6 then
+               // we change the name of the source file accordingly.
+               // The result file's extension is always .js
+               '<%= distdir %>/<%= projectName %>.js': srcdir + '/' + projectName + '.js'
+            }
+         }
+      },
+
+		babel: {
+			options: {
+				sourceMap: true
+			},
+			dist: {
+				src: srcdir + '/' + projectName + '.js',
+				dest: '<%= distdir %>/<%= projectName %>2.js'
+			}
+		},
+
 		curl: {
 			update_template: {
 				src: 'https://github.com/EnzeyNet/GitHub-Project-Template/archive/master.zip',
@@ -32,24 +60,25 @@ module.exports = function (grunt) {
 			dev: {
 				src: [
 					srcdir + '/' + projectName + '.js',
+					srcdir + '/' + 'flyout-prototype.js',
+					srcdir + '/' + 'flyout-init-component.js',
 					srcdir + '/**/*.js'
 				],
 				dest: '<%= distdir %>/<%= projectName %>.js'
+			},
+			dependents: {
+				src: [
+					'lib_bower/nz-services-core/dist/Services-Core.js',
+					'<%= distdir %>/<%= projectName %>.js'
+				],
+				dest: '<%= distdir %>/<%= projectName %>.allDeps.js'
 			}
 		},
 		uglify: {
 			production: {
 				files: {
-					'<%= distdir %>/<%= projectName %>.min.js': ['<%= distdir %>/<%= projectName %>.js']
-				}
-			},
-			allDependents: {
-				files: {
-					'<%= distdir %>/<%= projectName %>.allDeps.min.js': [
-						'lib_bower/nz-services-core/dist/Services-Core.js',
-						'lib_bower/nz-flyout-core/dist/Flyout-Core.js',
-						'<%= distdir %>/<%= projectName %>.js'
-					]
+					'<%= distdir %>/<%= projectName %>.min.js': ['<%= distdir %>/<%= projectName %>.js'],
+					'<%= distdir %>/<%= projectName %>.allDeps.min.js': ['<%= distdir %>/<%= projectName %>.allDeps.js']
 				}
 			}
 		},
@@ -117,13 +146,14 @@ module.exports = function (grunt) {
 		});
 	});
 
-	grunt.registerTask('all', ['get-dependencies', 'buildDev', 'buildProd', 'test']);
-	grunt.registerTask('buildDev', ['concat', 'less:dev', 'purgeEmptyFiles']);
-	grunt.registerTask('buildProd', ['buildDev', 'ngAnnotate', 'uglify', 'less:production', 'purgeEmptyFiles']);
+	grunt.registerTask('all', ['get-dependencies', 'build', 'dist', 'test']);
+	grunt.registerTask('init', ['get-dependencies']);
+	grunt.registerTask('build', ['browserify', 'concat:dependents', 'purgeEmptyFiles']);
+	grunt.registerTask('dist', ['build', 'uglify', 'less:production', 'purgeEmptyFiles']);
 	grunt.registerTask('test', ['karma:unit']);
 
 	grunt.registerTask('build-examples', 'Build gh-pages branch of examples.', function() {
-		grunt.task.run('buildDev', 'buildProd', 'update-examples', 'update-examples-dist');
+		grunt.task.run('build', 'dist', 'update-examples', 'update-examples-dist');
 	});
 
 	grunt.registerTask('purgeEmptyFiles', function() {

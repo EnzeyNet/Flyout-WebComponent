@@ -1,124 +1,15 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-if (!window.EnzeyNet) {
-	window.EnzeyNet = {};
-}
-EnzeyNet.FlyoutComponent = require('./flyout-prototype');
-
-try {
-	EnzeyNet.applyFunctions = function (someElem, someService) {
-		for (var f in someService.prototype) {
-			if ('function' === typeof someService.prototype[f]) {
-				someElem[f] = someService.prototype[f];
-			}
-		};
-	};
-
-	var flyoutElem = Object.create(HTMLElement.prototype);
-	EnzeyNet.applyFunctions(flyoutElem, EnzeyNet.FlyoutComponent);
-
-	// IE8 Shims needed Array.forEach, Array.map, HTMLElement.classList
-	document.registerElement('fly-out', {
-		prototype: flyoutElem
-	});
-} catch (e) {
-	console.error('Could not create flyout webcomponent');
-}
-
-},{"./flyout-prototype":3}],2:[function(require,module,exports){
-var Helpers = require('./helpers');
-
-var EventsBinder = function (flyoutElem) {
-
-	var events = this;
-
-	var processMouseMove = function (flyoutElem, event) {
-		var mX = event.clientX;
-		var mY = event.clientY;
-		var flyoutAnchorElemPos = Helpers.getBoxData(flyoutElem.flyoutAlignedToElem);
-
-		var aL = flyoutAnchorElemPos.left;
-		var aR = aL + flyoutAnchorElemPos.width;
-		var aT = flyoutAnchorElemPos.top;
-		var aB = aT + flyoutAnchorElemPos.height;
-
-		var isOutsideAncher = false;
-		if (mX < aL || mX > aR || mY < aT || mY > aB) {
-			isOutsideAncher = true;
-		}
-
-		var isOutsideContainer = false;
-		var flyoutContainerPos = Helpers.getBoxData(flyoutElem.flyoutContainer);
-
-		var cL = flyoutContainerPos.left;
-		var cR = cL + flyoutContainerPos.width;
-		var cT = flyoutContainerPos.top;
-		var cB = cT + flyoutContainerPos.height;
-
-		if (mX < cL || mX > cR || mY < cT || mY > cB) {
-			isOutsideContainer = true;
-		}
-
-		if (isOutsideAncher && isOutsideContainer) {
-			flyoutElem.unbindEvents();
-			flyoutElem.close();
-			flyoutElem.parentElement.addEventListener('mouseover', events.watchMouseOver);
-		}
-	};
-
-	this.watchMouseOver = function (event) {
-		flyoutElem.unbindEvents();
-		flyoutElem.displayFlyout();
-		if (!flyoutElem.getFlyoutParent()) {
-			document.body.addEventListener('mousemove', events.watchMouseMove);
-		}
-	};
-
-	this.watchMouseMove = function (event) {
-		var flyoutChild = this.getFlyoutChild();
-		if (flyoutChild) {
-			events.watchMouseMove.call(flyoutChild, event);
-		}
-
-		if (flyoutElem.isActive() && (!flyoutChild || !flyoutChild.isActive())) {
-			processMouseMove(this, event);
-		}
-	};
-
-	this.clickEvent = function (event) {
-		EnzeyNet.Services.registerClickAwayAction(flyoutElem.close, flyoutElem.flyoutContainer, flyoutElem.parentElement);
-
-		flyoutElem.displayFlyout();
-	};
-};
-
-module.exports = EventsBinder;
-/*
-module.exports = function(bindable) {
-	var boundClones = {};
-	Object.keys(events).forEach(function(key) {
-		var fn = events[key];
-		boundClones[key] = fn.bind(bindable)
-	})
-
-	return boundClones;
-};
-
-module.exports = events;
-*/
-
-},{"./helpers":4}],3:[function(require,module,exports){
 var EventsBinder = require('./events');
 var Helpers = require('./helpers');
 
-var flyoutComponent = function () {
+var flyoutComponent = function() {
 	// expect Array.prototype.forEach
 	// expect Array.prototype.map
 };
 var flyoutProto = flyoutComponent.prototype;
 
-flyoutProto.registerScrollEvent = function (elem) {
+flyoutProto.registerScrollEvent = function(elem) {
 	var flyoutElem = this;
-	var wrappedScrollEvent = function () {
+	var wrappedScrollEvent = function() {
 		if (flyoutElem.isActive()) {
 			flyoutElem.positionFlyout(flyoutElem.flyoutAlignedToElem);
 		} else {
@@ -132,24 +23,27 @@ flyoutProto.registerScrollEvent = function (elem) {
 	elem.addEventListener('scroll', wrappedScrollEvent);
 };
 
-flyoutProto.removeScrollEvents = function () {
+flyoutProto.removeScrollEvents = function() {
 	var flyoutElem = this;
 	if (flyoutElem.watchedElements) {
-		flyoutElem.watchedElements.forEach(function (group) {
+		flyoutElem.watchedElements.forEach(function(group) {
 			group.elem.removeEventListener('scroll', group.fn);
 		});
 	}
 	flyoutElem.watchedElements = [];
 };
 
-flyoutProto.getPositioningKeys = function () {
+flyoutProto.getPositioningKeys = function() {
 	return {
-		attributes: [],
-		classes: ['flyout-against']
+		attributes: [
+		],
+		classes: [
+			'flyout-against'
+		]
 	};
 };
 
-flyoutProto.findParentToPositionAgainst = function () {
+flyoutProto.findParentToPositionAgainst = function() {
 	var flyoutElem = this;
 	var positionAgainstElem;
 	if (true) {
@@ -157,9 +51,9 @@ flyoutProto.findParentToPositionAgainst = function () {
 		var positioningKeys = flyoutElem.getPositioningKeys();
 		if (positioningKeys.attributes) {
 			var clone = positioningKeys.attributes.slice(0);
-			clone.map(function (attr) {
+			clone.map(function(attr) {
 				return 'data-' + attr;
-			}).forEach(function (attr) {
+			}).forEach(function(attr) {
 				positioningKeys.attributes.push(attr);
 			});
 		}
@@ -168,7 +62,7 @@ flyoutProto.findParentToPositionAgainst = function () {
 		var searchParentElem = flyoutElem.parentElement;
 		while (searchParentElem && !positionAgainstElem) {
 			if (positioningKeys.classes instanceof Array) {
-				positioningKeys.classes.forEach(function (someClass) {
+				positioningKeys.classes.forEach(function(someClass) {
 					if (!positionAgainstElem) {
 						if (searchParentElem.classList.contains(someClass)) {
 							positionAgainstElem = searchParentElem;
@@ -177,7 +71,7 @@ flyoutProto.findParentToPositionAgainst = function () {
 				});
 			}
 			if (positioningKeys.attributes instanceof Array) {
-				positioningKeys.attributes.forEach(function (someAttribute) {
+				positioningKeys.attributes.forEach(function(someAttribute) {
 					if (!positionAgainstElem) {
 						if (searchParentElem.attributes[someAttribute]) {
 							positionAgainstElem = searchParentElem;
@@ -188,6 +82,7 @@ flyoutProto.findParentToPositionAgainst = function () {
 
 			searchParentElem = searchParentElem.parentElement;
 		}
+
 	}
 	if (!positionAgainstElem) {
 		positionAgainstElem = flyoutElem.parentElement;
@@ -196,7 +91,7 @@ flyoutProto.findParentToPositionAgainst = function () {
 	return positionAgainstElem;
 };
 
-flyoutProto.createdCallback = function () {
+flyoutProto.createdCallback = function() {
 	var flyoutId = this.getAttribute('id');
 	if (!flyoutId) {
 		flyoutId = 'f' + Date.now();
@@ -215,34 +110,34 @@ flyoutProto.createdCallback = function () {
 	this.EVENTS = new EventsBinder(this);
 
 	var flyoutElem = this;
-	(function () {
+	(function() {
 		var flyoutParent = null;
-		flyoutElem.setFlyoutParent = function (elem) {
+		flyoutElem.setFlyoutParent = function(elem) {
 			flyoutParent = elem;
 		};
-		flyoutElem.getFlyoutParent = function (elem) {
+		flyoutElem.getFlyoutParent = function(elem) {
 			return flyoutParent;
 		};
 	})();
-	(function () {
+	(function() {
 		var flyoutChild = null;
-		flyoutElem.setFlyoutChild = function (elem) {
+		flyoutElem.setFlyoutChild = function(elem) {
 			flyoutChild = elem;
 		};
-		flyoutElem.getFlyoutChild = function (elem) {
+		flyoutElem.getFlyoutChild = function(elem) {
 			return flyoutChild;
 		};
 	})();
 };
 
-flyoutProto.attachedCallback = function () {
+flyoutProto.attachedCallback = function() {
 	// Process element attributes
-	this.attributeChangedCallback('flyout-on', null, this.getAttribute('flyout-on'));
+	this.attributeChangedCallback('flyout-on',  null, this.getAttribute('flyout-on'));
 };
 
-flyoutProto.detachedCallback = function () {
+flyoutProto.detachedCallback = function() {
 	// Process element attributes
-	this.attributeChangedCallback('flyout-on', this.getAttribute('flyout-on'), null);
+	this.attributeChangedCallback('flyout-on',  this.getAttribute('flyout-on'), null);
 };
 
 flyoutProto.attributeChangedCallback = function (name, oldValue, newValue) {
@@ -253,14 +148,14 @@ flyoutProto.attributeChangedCallback = function (name, oldValue, newValue) {
 	}
 };
 
-flyoutProto.isActive = function () {
+flyoutProto.isActive = function() {
 	if (this.flyoutAlignedToElem && this.flyoutContainer) {
 		return true;
 	};
 	return false;
 };
 
-flyoutProto.bindFlyoutAction = function (newValue, oldValue) {
+flyoutProto.bindFlyoutAction = function(newValue, oldValue) {
 	var flyoutElem = this;
 	flyoutElem.unbindEvents();
 	if (typeof newValue === 'string') {
@@ -273,7 +168,7 @@ flyoutProto.bindFlyoutAction = function (newValue, oldValue) {
 	}
 };
 
-flyoutProto.unbindEvents = function () {
+flyoutProto.unbindEvents = function() {
 	var flyoutElem = this;
 
 	flyoutElem.parentElement.removeEventListener('click', flyoutElem.EVENTS.clickEvent);
@@ -281,14 +176,14 @@ flyoutProto.unbindEvents = function () {
 	document.body.removeEventListener('mousemove', flyoutElem.EVENTS.watchMouseMove);
 };
 
-flyoutProto.clearTimers = function () {
+flyoutProto.clearTimers = function() {
 	if (this.pendingRenderActions) {
 		window.cancelAnimationFrame(this.pendingRenderActions.animationFrame);
 		window.clearTimeout(this.pendingRenderActions.timeout);
 	}
 	this.pendingRenderActions = {};
 };
-flyoutProto.close = function () {
+flyoutProto.close = function() {
 	var flyoutElem = this;
 
 	flyoutElem.unlinkFlyouts();
@@ -299,14 +194,14 @@ flyoutProto.close = function () {
 	flyoutElem.flyoutAlignedToElem = null;
 };
 
-flyoutProto.displayFlyout = function () {
+flyoutProto.displayFlyout = function() {
 	var flyoutElem = this;
 
 	flyoutElem.clearTimers();
 	this.linkFlyouts();
 	flyoutElem.flyoutAlignedToElem = this.findParentToPositionAgainst();
 
-	flyoutElem.pendingRenderActions.animationFrame = window.requestAnimationFrame(function () {
+	flyoutElem.pendingRenderActions.animationFrame = window.requestAnimationFrame(function() {
 		if (!flyoutElem.flyoutContainer) {
 			flyoutElem.flyoutContainer = document.createElement('div');
 			flyoutElem.flyoutContainer.innerHTML = flyoutElem.flyoutTempalte;
@@ -329,12 +224,12 @@ flyoutProto.displayFlyout = function () {
 			elemLeft = '0';
 			flyoutElem.flyoutContainer.style.visibility = 'hidden';
 
-			flyoutElem.flyoutContainer.getFlyoutOwner = function () {
+			flyoutElem.flyoutContainer.getFlyoutOwner = function() {
 				return flyoutElem;
 			};
 		}
 
-		flyoutElem.pendingRenderActions.timeout = setTimeout(function () {
+		flyoutElem.pendingRenderActions.timeout = setTimeout(function() {
 			// Transverse DOM looking for element to position against.
 			var searchParentElem = flyoutElem.flyoutAlignedToElem.parentElement;
 			while (searchParentElem) {
@@ -345,26 +240,23 @@ flyoutProto.displayFlyout = function () {
 			flyoutElem.positionFlyout(flyoutElem.flyoutAlignedToElem);
 		}, 0);
 	});
-};
 
-var extractElemPostion = function (alignMyAttr, alignToAttr) {
+}
+
+var extractElemPostion = function(alignMyAttr, alignToAttr) {
 	var result = null;
 	if (alignMyAttr) {
 		if (alignToAttr) {
 			var alignMyArray = alignMyAttr.split(' ');
-			if (alignMyArray.length !== 2) {
-				return;
-			}
+			if (alignMyArray.length !== 2) {return;}
 
-			var myVerticalPredicate = alignMyArray[0];
+			var myVerticalPredicate   = alignMyArray[0];
 			var myHorizontalPredicate = alignMyArray[1];
 
 			var alignToArray = alignToAttr.split(' ');
-			if (alignToArray.length !== 2) {
-				return;
-			}
+			if (alignToArray.length !== 2) {return;}
 
-			var itsVerticalPredicate = alignToArray[0];
+			var itsVerticalPredicate   = alignToArray[0];
 			var itsHorizontalPredicate = alignToArray[1];
 
 			result = {
@@ -383,69 +275,69 @@ var extractElemPostion = function (alignMyAttr, alignToAttr) {
 	return result;
 };
 
-var getLeftPos = function (hPos, flyoutContainerPos, flyoutAnchorElemPos) {
+var getLeftPos = function(hPos, flyoutContainerPos, flyoutAnchorElemPos) {
 	var elemLeft = 0;
 	if (hPos.my === 'center') {
 		if (hPos.its === 'center') {
-			elemLeft = inputPos.left - boxPos.width + 'px';
+			elemLeft = (inputPos.left - boxPos.width) + 'px';
 		} else if (hPos.its === 'left') {
-			elemLeft = inputPos.left - boxPos.width + 'px';
+			elemLeft = (inputPos.left - boxPos.width) + 'px';
 		} else if (hPos.its === 'right') {
-			elemLeft = inputPos.left - boxPos.width + 'px';
+			elemLeft = (inputPos.left - boxPos.width) + 'px';
 		}
 	} else if (hPos.my === 'left') {
 		if (hPos.its === 'center') {
-			elemLeft = flyoutAnchorElemPos.left + 'px';
+			elemLeft = (flyoutAnchorElemPos.left) + 'px';
 		} else if (hPos.its === 'left') {
-			elemLeft = flyoutAnchorElemPos.left + 'px';
+			elemLeft = (flyoutAnchorElemPos.left) + 'px';
 		} else if (hPos.its === 'right') {
-			elemLeft = flyoutAnchorElemPos.left + flyoutAnchorElemPos.width + 'px';
+			elemLeft = (flyoutAnchorElemPos.left + flyoutAnchorElemPos.width) + 'px';
 		}
 	} else if (hPos.my === 'right') {
 		if (hPos.its === 'center') {
-			elemLeft = inputPos.left - boxPos.width + 'px';
+			elemLeft = (inputPos.left - boxPos.width) + 'px';
 		} else if (hPos.its === 'left') {
-			elemLeft = flyoutAnchorElemPos.left - flyoutContainerPos.width + 'px';
+			elemLeft = (flyoutAnchorElemPos.left - flyoutContainerPos.width) + 'px';
 		} else if (hPos.its === 'right') {
-			elemLeft = flyoutAnchorElemPos.left - flyoutContainerPos.width + flyoutAnchorElemPos.width + 'px';
+			elemLeft = (flyoutAnchorElemPos.left - flyoutContainerPos.width + flyoutAnchorElemPos.width) + 'px';
 		}
 	}
 
 	return elemLeft;
 };
 
-var getTopPos = function (vPos, flyoutContainerPos, flyoutAnchorElemPos) {
+var getTopPos = function(vPos, flyoutContainerPos, flyoutAnchorElemPos) {
 	var elemTop = 0;
 	if (vPos.my === 'center') {
 		if (vPos.its === 'center') {
-			elemTop = inputPos.left - boxPos.width + 'px';
+			elemTop = (inputPos.left - boxPos.width) + 'px';
 		} else if (vPos.its === 'top') {
-			elemTop = inputPos.left - boxPos.width + 'px';
+			elemTop = (inputPos.left - boxPos.width) + 'px';
 		} else if (vPos.its === 'bottom') {
-			elemTop = inputPos.left - boxPos.width + 'px';
+			elemTop = (inputPos.left - boxPos.width) + 'px';
 		}
 	} else if (vPos.my === 'top') {
 		if (vPos.its === 'center') {
-			elemTop = flyoutAnchorElemPos.left + 'px';
+			elemTop = (flyoutAnchorElemPos.left) + 'px';
 		} else if (vPos.its === 'top') {
-			elemTop = flyoutAnchorElemPos.top + 'px';
+			elemTop = (flyoutAnchorElemPos.top) + 'px';
 		} else if (vPos.its === 'bottom') {
-			elemTop = flyoutAnchorElemPos.top + flyoutAnchorElemPos.height + 'px';
+			elemTop = (flyoutAnchorElemPos.top + flyoutAnchorElemPos.height) + 'px';
 		}
 	} else if (vPos.my === 'bottom') {
 		if (vPos.its === 'center') {
-			elemTop = inputPos.left - boxPos.width + 'px';
+			elemTop = (inputPos.left - boxPos.width) + 'px';
 		} else if (vPos.its === 'top') {
-			elemTop = flyoutAnchorElemPos.top - flyoutContainerPos.height + 'px';
+			elemTop = (flyoutAnchorElemPos.top - flyoutContainerPos.height) + 'px';
 		} else if (vPos.its === 'bottom') {
-			elemTop = flyoutAnchorElemPos.top - flyoutContainerPos.height + flyoutAnchorElemPos.height + 'px';
+			elemTop = (flyoutAnchorElemPos.top - flyoutContainerPos.height + flyoutAnchorElemPos.height) + 'px';
 		}
 	}
 
 	return elemTop;
 };
 
-flyoutProto.positionFlyout = function (alignToElement) {
+flyoutProto.positionFlyout = function(alignToElement) {
 	var flyoutElem = this;
 	var alignMyAttr = this.getAttribute('align-my');
 	var alignToAttr = this.getAttribute('align-to');
@@ -458,15 +350,16 @@ flyoutProto.positionFlyout = function (alignToElement) {
 		var elemLeft = getLeftPos(positioning.horizontal, flyoutContainerPos, flyoutAnchorElemPos);
 		var elemTop = getTopPos(positioning.vertical, flyoutContainerPos, flyoutAnchorElemPos);
 
-		flyoutElem.pendingRenderActions.animationFrame = window.requestAnimationFrame(function () {
+		flyoutElem.pendingRenderActions.animationFrame = window.requestAnimationFrame(function() {
 			flyoutElem.flyoutContainer.style.left = elemLeft;
 			flyoutElem.flyoutContainer.style.top = elemTop;
 			flyoutElem.flyoutContainer.style.visibility = 'visible';
 		});
 	}
+
 };
 
-flyoutProto.findParentFlyout = function () {
+flyoutProto.findParentFlyout = function() {
 	var searchElem = this.parentElement;
 	while (searchElem) {
 		if (searchElem.getFlyoutOwner) {
@@ -476,7 +369,7 @@ flyoutProto.findParentFlyout = function () {
 	}
 };
 
-flyoutProto.linkFlyouts = function () {
+flyoutProto.linkFlyouts = function() {
 	var parentFlyout = this.findParentFlyout();
 	if (parentFlyout) {
 		parentFlyout.setFlyoutChild(this);
@@ -484,7 +377,7 @@ flyoutProto.linkFlyouts = function () {
 	}
 };
 
-flyoutProto.unlinkFlyouts = function () {
+flyoutProto.unlinkFlyouts = function() {
 	var parentFlyout = this.getFlyoutChild();
 	if (parentFlyout) {
 		parentFlyout.setFlyoutChild(null);
@@ -493,23 +386,3 @@ flyoutProto.unlinkFlyouts = function () {
 };
 
 module.exports = flyoutComponent;
-
-},{"./events":2,"./helpers":4}],4:[function(require,module,exports){
-var helpers = {
-
-	getBoxData: function (node) {
-		var computedStyles = window.getComputedStyle(node);
-		var boxData = node.getBoundingClientRect();
-		boxData.marginLeft = parseInt(computedStyles.marginLeft);
-		boxData.marginRight = parseInt(computedStyles.marginRight);
-		boxData.marginTop = parseInt(computedStyles.marginTop);
-		boxData.marginBottom = parseInt(computedStyles.marginBottom);
-
-		return boxData;
-	}
-
-};
-
-module.exports = helpers;
-
-},{}]},{},[1]);

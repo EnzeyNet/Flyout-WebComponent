@@ -1,0 +1,67 @@
+<html>
+	<head>
+		<style>
+			.shim {
+				z-index: -1;
+			}
+			html, body {
+				height: 1000px;
+				width: 2000px;
+			}
+			.test1 {
+				position: absolute;
+				top: 200px;
+				left: 300px;
+			}
+			.test2 {
+				position: absolute;
+				top: 200px;
+				left: 600px;
+			}
+			.flyoutCont {
+				width: 30px;
+				height: 20px;
+				background-color: lightblue;
+			}
+			.flyoutCont2 {
+				width: 50px;
+				height: 30px;
+				background-color: lightgreen;
+			}
+			.flyoutCont3 {
+				width: 50px;
+				height: 60px;
+				background-color: cyan;
+			}
+		</style>
+		<script src="dist/Flyout-WebComponent.allDeps.js"></script>
+	</head>
+	<body>
+		<div class="test1">
+			<button>
+				<span>TEST!</span>
+				<fly-out flyout-on="hover" align-my="top left" align-to="bottom left">
+					<div class="flyoutCont">
+					</div>
+				</fly-out>
+			</button>
+		</div>
+		<div class="test2">
+			<button>
+				<span>TEST!</span>
+				<fly-out flyout-on="hover" align-my="top right" align-to="bottom right">
+					<div class="flyoutCont">
+						<fly-out flyout-on="hover" align-my="top left" align-to="bottom left">
+							<div class="flyoutCont2">
+								<fly-out flyout-on="hover" align-my="bottom left" align-to="bottom right">
+									<div class="flyoutCont3">
+									</div>
+								</fly-out>
+							</div>
+						</fly-out>
+					</div>
+				</fly-out>
+			</button>
+		</div>
+	</body>
+</html>

@@ -22,10 +22,6 @@
 		"!dist/*"
 	],
 	"dependencies": {
-		"nz-flyout-core": "0.0.x"
-	},
-	"devDependencies": {
-		"angular": "1.2.x",
-		"angular-mocks": "~1.2.x"
+		"nz-services-core": "0.0.x"
 	}
 }
