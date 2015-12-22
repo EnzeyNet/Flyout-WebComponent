@@ -1,13 +1,14 @@
 var Helpers = require('./helpers');
 
-var EventsBinder  = function(flyoutElem) {
+var EventsBinder  = function(flyout) {
 
     var events = this;
+	var unbound = {};
 
-	var processMouseMove = function(flyoutElem, event) {
+	events.processMouseMove = function(flyout, event) {
 		var mX = event.clientX;
 		var mY = event.clientY;
-		var flyoutAnchorElemPos = Helpers.getBoxData(flyoutElem.flyoutAlignedToElem);
+		var flyoutAnchorElemPos = Helpers.getBoxData(flyout.flyoutAlignedToElem);
 
 		var aL = flyoutAnchorElemPos.left;
 		var aR = aL + flyoutAnchorElemPos.width;
@@ -22,7 +23,7 @@ var EventsBinder  = function(flyoutElem) {
 		}
 
 		var isOutsideContainer = false;
-		var flyoutContainerPos = Helpers.getBoxData(flyoutElem.flyoutContainer);
+		var flyoutContainerPos = Helpers.getBoxData(flyout.flyoutContainer);
 
 		var cL = flyoutContainerPos.left;
 		var cR = cL + flyoutContainerPos.width;
@@ -34,40 +35,42 @@ var EventsBinder  = function(flyoutElem) {
 		}
 
 		if (isOutsideAncher && isOutsideContainer) {
-			flyoutElem.unbindEvents();
-			flyoutElem.close();
-			flyoutElem.parentElement.addEventListener('mouseover', events.watchMouseOver);
+			flyout.unbindEvents();
+			flyout.close();
+			flyout.flyoutElem.parentElement.addEventListener('mouseover', unbound.watchMouseOver);
+
+			return true;
 		}
 	};
 
-	this.watchMouseOver = function(event) {
-		flyoutElem.unbindEvents();
-		flyoutElem.displayFlyout();
-		if (!flyoutElem.getFlyoutParent()) {
-			document.body.addEventListener('mousemove', events.watchMouseMove);
-		}
+	unbound.watchMouseOver = function(event) {
+		flyout.unbindEvents();
+		flyout.displayFlyout();
 	};
+	this.watchMouseOver = unbound.watchMouseOver.bind(flyout)
 
-	this.watchMouseMove = function(event) {
+	unbound.watchMouseMove = function(event) {
 		var flyoutChild = this.getFlyoutChild();
 		if (flyoutChild) {
-			events.watchMouseMove.call(flyoutChild, event);
+			unbound.watchMouseMove.call(flyoutChild, event);
 		}
 
-		if (flyoutElem.isActive() && (!flyoutChild || !flyoutChild.isActive())) {
-			processMouseMove(this, event);
+		if (flyout.isActive() && (!flyoutChild || !flyoutChild.isActive())) {
+			processMouseMove(flyout, event);
 		}
 	};
+	this.watchMouseMove = unbound.watchMouseMove.bind(flyout)
 
-	this.clickEvent = function(event) {
+	unbound.clickEvent = function(event) {
 		EnzeyNet.Services.registerClickAwayAction(
-			flyoutElem.close,
-			flyoutElem.flyoutContainer,
-			flyoutElem.parentElement
+			flyout.close,
+			flyout.flyoutContainer,
+			flyout.parentElement
 		);
 
-		flyoutElem.displayFlyout();
+		flyout.displayFlyout();
 	};
+	this.clickEvent = unbound.clickEvent.bind(flyout)
 
 };
 
