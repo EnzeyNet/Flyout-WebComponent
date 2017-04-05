@@ -2,10 +2,9 @@ var Helpers = require('./helpers');
 
 var EventsBinder  = function(flyout) {
 
-    var events = this;
 	var unbound = {};
 
-	events.processMouseMove = function(flyout, event) {
+	var processMouseMove = function(flyout, event) {
 		var mX = event.clientX;
 		var mY = event.clientY;
 		var flyoutAnchorElemPos = Helpers.getBoxData(flyout.flyoutAlignedToElem);
@@ -50,7 +49,7 @@ var EventsBinder  = function(flyout) {
 	this.watchMouseOver = unbound.watchMouseOver.bind(flyout)
 
 	unbound.watchMouseMove = function(event) {
-		var flyoutChild = this.getFlyoutChild();
+		var flyoutChild = flyout.getFlyoutChild();
 		if (flyoutChild) {
 			unbound.watchMouseMove.call(flyoutChild, event);
 		}

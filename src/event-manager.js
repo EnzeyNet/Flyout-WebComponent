@@ -31,16 +31,16 @@ var findParentFlyout = function(newFlyout) {
 	return parentFlyout;
 };
 
-var disableWatch = function() {
-	console.log('disable event watcher')
-	document.removeEventListener('mousemove', eventWatcher);
-	isEventWatchingActive = false;
-};
-
 var enableWatch = function() {
 	console.log('enable event watcher')
 	isEventWatchingActive = true;
 	document.addEventListener('mousemove', eventWatcher);
+};
+
+var disableWatch = function() {
+	console.log('disable event watcher')
+	document.removeEventListener('mousemove', eventWatcher);
+	isEventWatchingActive = false;
 };
 
 var addActiveFlyout = function(flyout) {
